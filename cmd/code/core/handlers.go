@@ -2,51 +2,46 @@ package core
 
 import (
 	"fmt"
+	"log"
 	"net/http"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"os"
-)
 
+	"github.com/spf13/viper"
+)
 
 // YamlConfig is exported.
 type YamlConfig struct {
-	Routers  []struct{
-		Routerd	string `yaml:"index"`
-		Urld		string `yaml:"url"`
+	Routers []struct {
+		Router string `yaml:"index"`
+		Url    string `yaml:"url"`
 	} `yaml:"Routers"`
 }
 
 func home_page(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "go start")	
+	fmt.Fprintf(w, "go start")
 }
 
 func RunHandle() {
-	// http.HandleFunc("/", home_page)
+
 	fmt.Println("Hello")
-	// http.ListenAndServe(":8080", nil)
 
+	configPath := "./cmd/code/adminhtml/etc.yml"
 
-	fileName := "./cmd/code/adminhtml/etc.yml"
+	if configPath != "" {
+		fmt.Println("Parsing config: %s", configPath)
+		viper.SetConfigFile(configPath)
+		err := viper.ReadInConfig()
+		if err != nil {
+			log.Panicf("Unable to read config file: %s", err)
+		}
+	} else {
+		fmt.Printf("Config file is not specified.")
+	}
 
-    // yamlFile, err := ioutil.ReadFile(fileName)
-    // if err != nil {
-    //     fmt.Printf("Error reading YAML file: %s\n", err)
-    //     return
-    // }
+	router := viper.GetString("router")
 
-	// var yamlConfig YamlConfig
-	var conf YamlConfig
-    reader, _ := os.Open(fileName)
-    buf, _ := ioutil.ReadAll(reader)
-    yaml.Unmarshal(buf, &conf)
-    fmt.Printf("%+v\n", conf)
-	
-    // err = yaml.Unmarshal(yamlFile, &yamlConfig)
-    // if err != nil {
-    //     fmt.Printf("Error parsing YAML file: %s\n", err)
-    // }
+	http.HandleFunc(fmt.Sprintf("/%s", router), home_page)
+	http.ListenAndServe(":8080", nil)
 
-	
-    // fmt.Printf("Result: %+v\n", yamlConfig)
+	fmt.Println(viper.GetString("router"))
+
 }

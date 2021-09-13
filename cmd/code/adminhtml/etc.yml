@@ -1,5 +1,4 @@
-routers :
-  - router : "index"
-    url : "p20"
+router: adminhtml
+url: p20
 
 
